@@ -1,0 +1,54 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  version:
+    name: Compute version
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - name: Set version
+        id: version
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          DATE=$(date -u +%Y.%-m.%-d)
+          MAX_BUILD=$(gh release list --limit 100 --json tagName | jq -r --arg date "$DATE" '
+            [.[] | .tagName
+             | select(test("^" + ($date | gsub("\\."; "\\.")) + "-[0-9]+$"))
+             | capture("-(?<n>[0-9]+)$").n
+             | tonumber] | max // 0
+          ')
+          BUILD=$((MAX_BUILD + 1))
+          echo "version=${DATE}-${BUILD}" >> "$GITHUB_OUTPUT"
+
+  release:
+    name: Create release
+    needs: version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Archive scripts
+        run: zip -r "powershell-ffmpeg-scripts-${{ needs.version.outputs.version }}.zip" bin
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ needs.version.outputs.version }}" \
+            --title "${{ needs.version.outputs.version }}" \
+            --generate-notes \
+            "powershell-ffmpeg-scripts-${{ needs.version.outputs.version }}.zip"
