@@ -135,7 +135,7 @@ $params += @(
 
 ffmpeg.exe @params `
     -pass 1 `
-    -vsync cfr `
+    -fps_mode cfr `
     -f null NUL
 ffmpeg.exe @params `
     -pass 2 `

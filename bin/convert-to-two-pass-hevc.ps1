@@ -100,8 +100,8 @@ if ($encoder.HwAccel) {
     )
 } else {
     $params += @(
-        '-vsync'
-        '0'
+        '-fps_mode'
+        'passthrough'
     )
 }
 
@@ -142,7 +142,7 @@ $params += @(
 
 ffmpeg.exe @params `
     -pass 1 `
-    -vsync cfr `
+    -fps_mode cfr `
     -f null NUL
 ffmpeg.exe @params `
     -pass 2 `
