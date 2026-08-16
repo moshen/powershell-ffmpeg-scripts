@@ -10,9 +10,9 @@ param(
     [float]$start_time = 0, # Start time in seconds (seek to)
     [float]$total_time = 0, # Total duration in seconds (snipping your clip)
     [string]$filters = "",
-    [string]$resolution = "720",
+    [string]$resolution = "1080",
     [int]$audio_bitrate = 100,
-    [float]$target_size = 10, # My math must be off because 10mb doesn't work 
+    [float]$target_size = 20, # My math must be off because 20mb doesn't work sometimes
     [boolean]$full_size_copy = 0,
     [System.IO.DirectoryInfo]$full_size_path = '.\full\'
 )
