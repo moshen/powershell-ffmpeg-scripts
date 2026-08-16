@@ -4,7 +4,9 @@ Requires ffmpeg.exe (and ffprobe.exe) in your PATH.
 
 ## Installation
 
-### mise (recommended)
+Download the script bundle from releases. Or...
+
+### mise
 
 These scripts are distributed as GitHub release archives, one per push to `main`.
 Install the latest release with [mise](https://mise.jdx.dev) using the `github:`
@@ -47,6 +49,7 @@ your PATH.
 - `convert-to-dnxhd.ps1` — convert to DNxHD (for DaVinci Resolve)
 - `convert-to-two-pass-h264.ps1` — two-pass H.264 encode (auto-detects NVENC/QSV/AMF)
 - `convert-to-two-pass-hevc.ps1` — two-pass HEVC encode (auto-detects NVENC/QSV/AMF)
+- `convert-to-two-pass-av1.ps1` — two-pass AV1 encode (auto-detects NVENC/QSV/AMF)
 - `convert-for-discord.ps1` — encode a clip to fit under Discord's size limit
 - `drag-here-to-convert-for-discord.ps1` — drop files onto a shortcut to run `convert-for-discord.ps1`
 - `create-copy-of-file-with-metadata-comment.ps1` — embed a text comment into media metadata
