@@ -91,17 +91,10 @@ if ($start_time -gt 0) {
 
 if ($encoder.HwAccel) {
     $params += @(
-        '-vsync'
-        '0'
         '-hwaccel'
         $encoder.HwAccel
         '-hwaccel_output_format'
         $encoder.HwAccelOutputFormat
-    )
-} else {
-    $params += @(
-        '-fps_mode'
-        'passthrough'
     )
 }
 

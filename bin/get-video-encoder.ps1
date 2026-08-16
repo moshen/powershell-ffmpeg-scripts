@@ -41,7 +41,7 @@ function Get-VideoEncoder {
 
     $encoders = ffmpeg -hide_banner -encoders 2>&1 | Out-String
 
-    if ($encoders -match "$Codec._nvenc") {
+    if ($encoders -match "${Codec}_nvenc") {
         return @{
             Encoder              = "${Codec}_nvenc"
             Preset               = "p7"
@@ -51,7 +51,7 @@ function Get-VideoEncoder {
         }
     }
 
-    if ($encoders -match "$Codec._qsv") {
+    if ($encoders -match "${Codec}_qsv") {
         return @{
             Encoder              = "${Codec}_qsv"
             Preset               = "fast"
@@ -61,7 +61,7 @@ function Get-VideoEncoder {
         }
     }
 
-    if ($encoders -match "$Codec._amf") {
+    if ($encoders -match "${Codec}_amf") {
         return @{
             Encoder              = "${Codec}_amf"
             Preset               = "speed"
