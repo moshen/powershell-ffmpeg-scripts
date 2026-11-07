@@ -53,3 +53,18 @@ your PATH.
 - `convert-for-discord.ps1` — encode a clip to fit under Discord's size limit
 - `drag-here-to-convert-for-discord.ps1` — drop files onto a shortcut to run `convert-for-discord.ps1`
 - `create-copy-of-file-with-metadata-comment.ps1` — embed a text comment into media metadata
+- `get-video-encoder.ps1` — picks the encoder the two-pass scripts use
+
+### Saving the detected encoder
+
+The two-pass scripts test which hardware encoder works each time
+they run. To detect once and reuse the result, run:
+
+```powershell
+get-video-encoder.ps1 -SaveDefaults
+```
+
+This saves the choice for each codec to
+`%LOCALAPPDATA%\powershell-ffmpeg-scripts\video-encoders.json`. Run it again
+after changing your GPU, drivers or ffmpeg build, or delete that file to go
+back to detecting on every run.
