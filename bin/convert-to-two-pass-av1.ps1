@@ -80,6 +80,17 @@ if ($target_size -gt 0) {
 $encoder = Get-VideoEncoder -Codec "av1"
 Write-Output "Using encoder: $($encoder.Encoder) (preset $($encoder.Preset))"
 
+# With hardware decoding, frames normally stay on the GPU so the GPU scale
+# filter can use them directly. Custom filters like eq or crop only work on
+# frames in system memory, so when any are given, let ffmpeg copy decoded
+# frames back and scale in software. The hardware encoder is still used.
+$hwAccelOutputFormat = $encoder.HwAccelOutputFormat
+$scaleFilter = $encoder.ScaleFilter
+if (-not [string]::IsNullOrEmpty($filters)) {
+    $hwAccelOutputFormat = $null
+    $scaleFilter = "scale"
+}
+
 $params = @()
 
 if ($start_time -gt 0) {
@@ -93,9 +104,14 @@ if ($encoder.HwAccel) {
     $params += @(
         '-hwaccel'
         $encoder.HwAccel
-        '-hwaccel_output_format'
-        $encoder.HwAccelOutputFormat
     )
+
+    if ($hwAccelOutputFormat) {
+        $params += @(
+            '-hwaccel_output_format'
+            $hwAccelOutputFormat
+        )
+    }
 }
 
 $params += @(
@@ -112,7 +128,7 @@ if ($total_time -gt 0) {
 
 $params += @(
     '-vf'
-    "${filters}$($encoder.ScaleFilter)=-1:${resolution}"
+    "${filters}${scaleFilter}=-1:${resolution}"
     '-c:v'
     $encoder.Encoder
     '-preset'
