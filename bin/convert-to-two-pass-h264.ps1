@@ -153,6 +153,20 @@ ffmpeg.exe @params `
     -pass 1 `
     -fps_mode cfr `
     -f null NUL
+
+if ($LASTEXITCODE -ne 0) {
+    Write-Error "ffmpeg failed on the first pass, see its output above"
+    exit 1
+}
+
 ffmpeg.exe @params `
     -pass 2 `
     "${output_file}.mp4"
+
+if ($LASTEXITCODE -ne 0) {
+    # ffmpeg can leave an empty or partial file behind when it fails, which
+    # would otherwise look like a finished encode.
+    Remove-Item -Force -LiteralPath "${output_file}.mp4" -ErrorAction SilentlyContinue
+    Write-Error "ffmpeg failed on the second pass, see its output above"
+    exit 1
+}

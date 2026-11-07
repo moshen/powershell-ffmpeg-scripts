@@ -18,6 +18,17 @@ param(
 )
 
 $max_size = $target_size; # In MB
+$output_path = "${output_file}.mp4"
+
+if (Test-Path -LiteralPath $output_path) {
+    if ((Get-Item -LiteralPath $output_path).Length -eq 0) {
+        # An empty file is left over from an ffmpeg run that failed
+        Remove-Item -Force -LiteralPath $output_path
+    } else {
+        Write-Output "$output_path already exists, delete it to convert again"
+        exit
+    }
+}
 
 $params = @()
 
@@ -60,13 +71,23 @@ if ($full_size_copy)
 if (($input_file_ext -eq ".mp4") -and [string]::IsNullOrEmpty($filters))
 {
     ffmpeg.exe @params `
-        "${output_file}.mp4"
+        "$output_path"
 }
 
-while ((-Not (Test-Path -Path "${output_file}.mp4")) -or (((Get-Item "${output_file}.mp4").Length/1MB) -gt $max_size)) {
-    if (Test-Path -Path "${output_file}.mp4") {
-        Remove-Item -Force "${output_file}.mp4"
-        $target_size = $target_size - .5;
+while ($true) {
+    if (Test-Path -LiteralPath $output_path) {
+        $size = (Get-Item -LiteralPath $output_path).Length
+
+        if (($size -gt 0) -and (($size / 1MB) -le $max_size)) {
+            break
+        }
+
+        Remove-Item -Force -LiteralPath $output_path
+
+        # Too big rather than empty, so aim a little lower next time
+        if ($size -gt 0) {
+            $target_size = $target_size - .5;
+        }
     }
 
     & "$PSScriptRoot\convert-to-two-pass-h264.ps1" `
@@ -78,4 +99,12 @@ while ((-Not (Test-Path -Path "${output_file}.mp4")) -or (((Get-Item "${output_f
     -resolution "$resolution" `
     -audio_bitrate "$audio_bitrate" `
     -target_size "$target_size"
+
+    # A failed encode leaves no file (or an empty one). Stop rather than
+    # retrying the same failing command forever.
+    if ((-Not (Test-Path -LiteralPath $output_path)) -or ((Get-Item -LiteralPath $output_path).Length -eq 0)) {
+        Remove-Item -Force -LiteralPath $output_path -ErrorAction SilentlyContinue
+        Write-Error "Encoding failed, see the output above"
+        exit 1
+    }
 }
